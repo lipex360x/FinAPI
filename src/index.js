@@ -120,4 +120,27 @@ app.post('/withdraw', (request, response) => {
 
 })
 
+app.put("/account", (request, response) => {
+  const { customer } = request
+  const { name } = request.body
+
+  customer.name = name
+
+  return response.status(201).send(customer)
+})
+
+app.get("/account", (request, response) => {
+  const { customer } = request
+
+  return response.json(customer)
+})
+
+app.delete("/account", (request, response) => {
+  const { customer } = request
+
+  customers.splice(customer, 1)
+
+  return response.status(200).json(customers)
+})
+
 app.listen(3333)
