@@ -22,6 +22,22 @@ function verifyAccountCPF(request, response, next) {
   return next()
 }
 
+function getBalance(statement) {
+  
+  const balance = statement.reduce(( accumulate, operation ) => {
+    const { type, amount } = operation
+
+    if(type === 'credit') {
+      return accumulate + amount
+    } else {
+      return accumulate - amount
+    }
+
+  }, 0)
+
+  return balance
+}
+
 app.post('/account', (request, response) => {
   const { name, cpf } = request.body
 
@@ -59,16 +75,38 @@ app.post('/deposit', (request, response) => {
 
   const { customer } = request
 
-  const statmentOperation = {
+  const statementOperation = {
     description,
     amount,
     created_at: new Date(),
     type: "credit"
   }
 
-  customer.statement.push(statmentOperation)
+  customer.statement.push(statementOperation)
 
-  return response.status(201).send()
+  return response.status(201).send(statementOperation)
+})
+
+app.post('/withdraw', (request, response) => {
+  const { customer } = request
+  const { amount } = request.body
+
+  const balance = getBalance(customer.statement)
+
+  if(balance < amount) {
+    return response.status(400).json({error:"Insufficient funds!"})
+  }
+
+  const statementOperation = {
+    amount,
+    created_at: new Date(),
+    type: "debit"
+  }
+
+  customer.statement.push(statementOperation)
+
+  return response.status(201).send(statementOperation)
+
 })
 
 app.listen(3333)
