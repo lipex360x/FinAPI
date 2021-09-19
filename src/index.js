@@ -143,4 +143,12 @@ app.delete("/account", (request, response) => {
   return response.status(200).json(customers)
 })
 
+app.get('/balance', (request, response) => {
+  const { statement } = request.customer
+
+  const balance = getBalance(statement)
+
+  return response.json(balance)
+})
+
 app.listen(3333)
